@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Z-Labs Random Challenge 🎲</title>
+<style>
+:root{--bg:#0a0916;--c1:#8b5cf6;--c2:#22d3ee;--c3:#f472b6;--tx:#eef0ff;--bd:rgba(255,255,255,.14)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:system-ui,Segoe UI,Roboto,sans-serif;min-height:100vh;overflow-x:hidden}
+canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:1;width:100%;height:100%}
+.orb{position:fixed;border-radius:50%;filter:blur(90px);opacity:.45;z-index:0;animation:fl 12s ease-in-out infinite alternate}
+.o1{width:420px;height:420px;background:var(--c1);top:-100px;left:-100px}
+.o2{width:380px;height:380px;background:var(--c2);bottom:-120px;right:-80px;animation-delay:-4s}
+.o3{width:300px;height:300px;background:var(--c3);top:40%;left:55%;animation-delay:-8s}
+@keyframes fl{to{transform:translate(60px,-50px) scale(1.25)}}
+.wrap{position:relative;z-index:2;max-width:880px;margin:0 auto;padding:18px 16px 40px;text-align:center}
+header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.logo{font-weight:800;letter-spacing:.5px}
+.status{font-size:.78rem;padding:6px 12px;border:1px solid var(--bd);border-radius:99px;background:rgba(255,255,255,.05)}
+h1{font-size:clamp(1.9rem,6vw,3.4rem);line-height:1.1;margin:14px 0 8px;background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3),var(--c1));background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:gr 6s linear infinite}
+@keyframes gr{to{background-position:300% 0}}
+.sub{opacity:.75;margin-bottom:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:12px 0}
+.chip{border:1px solid var(--bd);background:rgba(255,255,255,.06);color:var(--tx);padding:7px 13px;border-radius:99px;cursor:pointer;font-size:.85rem;transition:.25s}
+.chip:hover{transform:translateY(-3px);border-color:var(--c2)}
+.chip.on{background:linear-gradient(90deg,var(--c1),var(--c3));border-color:transparent;box-shadow:0 0 18px rgba(244,114,182,.5)}
+.scene{perspective:700px;width:110px;height:110px;margin:26px auto}
+.cube{width:100%;height:100%;position:relative;transform-style:preserve-3d;animation:idle 9s linear infinite}
+.cube.roll{animation:roll .55s linear infinite}
+.face{position:absolute;width:110px;height:110px;display:grid;place-items:center;font-size:46px;background:rgba(139,92,246,.25);border:2px solid var(--c2);border-radius:18px;box-shadow:inset 0 0 25px rgba(34,211,238,.45),0 0 18px rgba(139,92,246,.4)}
+.f1{transform:translateZ(55px)}.f2{transform:rotateY(90deg) translateZ(55px)}.f3{transform:rotateY(180deg) translateZ(55px)}
+.f4{transform:rotateY(-90deg) translateZ(55px)}.f5{transform:rotateX(90deg) translateZ(55px)}.f6{transform:rotateX(-90deg) translateZ(55px)}
+@keyframes idle{to{transform:rotateX(360deg) rotateY(360deg)}}
+@keyframes roll{0%{transform:rotateX(0) rotateY(0) scale(1)}50%{transform:rotateX(360deg) rotateY(360deg) scale(1.3)}100%{transform:rotateX(720deg) rotateY(720deg) scale(1)}}
+.card{position:relative;min-height:200px;padding:26px 20px;border-radius:24px;background:rgba(255,255,255,.07);border:1px solid var(--bd);backdrop-filter:blur(10px);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:14px;box-shadow:0 10px 50px rgba(139,92,246,.25)}
+.badge{font-size:.8rem;padding:5px 12px;border-radius:99px;background:rgba(34,211,238,.15);border:1px solid var(--c2)}
+.txt{font-size:clamp(1.25rem,3.4vw,1.9rem);font-weight:700;line-height:1.35;min-height:2.6em;display:flex;align-items:center}
+.card.shuffling .txt{filter:blur(1.6px);animation:gl .12s infinite}
+.card.shuffling{box-shadow:0 0 60px rgba(34,211,238,.5)}
+@keyframes gl{0%{transform:translate(-3px,1px);text-shadow:3px 0 var(--c3),-3px 0 var(--c2)}50%{transform:translate(3px,-1px)}100%{transform:translate(0,0);text-shadow:-3px 0 var(--c3),3px 0 var(--c2)}}
+.card.reveal{animation:pop .75s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{0%{transform:scale(.55) rotateX(90deg);opacity:0}100%{transform:none;opacity:1}}
+.roll-btn{margin:24px 0 12px;font-size:1.35rem;font-weight:800;color:#fff;border:0;padding:18px 46px;border-radius:99px;cursor:pointer;background:linear-gradient(90deg,var(--c1),var(--c3));box-shadow:0 0 30px rgba(244,114,182,.6);animation:pulse 1.8s infinite;transition:transform .2s}
+.roll-btn:hover{transform:scale(1.07)}.roll-btn:active{transform:scale(.94)}
+.roll-btn:disabled{opacity:.7;cursor:wait;animation:none}
+@keyframes pulse{50%{box-shadow:0 0 55px rgba(34,211,238,.8)}}
+.acts{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:8px 0}
+.sm{border:1px solid var(--bd);background:rgba(255,255,255,.07);color:var(--tx);padding:9px 15px;border-radius:12px;cursor:pointer;font-size:.88rem;transition:.2s}
+.sm:hover{background:rgba(139,92,246,.35)}
+.sm.red{border-color:#f43f5e}
+.hist{margin-top:18px;text-align:left;font-size:.85rem;opacity:.85}
+.hist div{padding:7px 10px;border-left:3px solid var(--c1);margin:5px 0;background:rgba(255,255,255,.04);border-radius:6px}
+footer{margin-top:30px;opacity:.8;font-size:.85rem}
+.em{position:fixed;bottom:-40px;font-size:2rem;z-index:3;pointer-events:none;animation:rise 2.4s ease-out forwards}
+@keyframes rise{to{transform:translateY(-110vh) rotate(360deg);opacity:0}}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1b1740;border:1px solid var(--c2);padding:11px 18px;border-radius:12px;z-index:99;font-size:.9rem;max-width:92vw}
+.modal{position:fixed;inset:0;background:rgba(5,4,15,.88);backdrop-filter:blur(8px);z-index:50;display:none;align-items:center;justify-content:center;padding:14px}
+.modal.on{display:flex}
+.box{background:#12102b;border:1px solid var(--bd);border-radius:20px;padding:24px;width:100%;max-width:380px}
+.box h3{margin-bottom:12px}
+input,select,textarea{width:100%;padding:11px 13px;border-radius:10px;border:1px solid var(--bd);background:#0c0a20;color:var(--tx);margin:6px 0;font-size:.95rem;font-family:inherit}
+.dash{background:#0d0b22;border:1px solid var(--bd);border-radius:20px;width:100%;max-width:1000px;height:92vh;overflow:auto;padding:18px;text-align:left}
+.dh{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+.st{background:rgba(255,255,255,.06);border:1px solid var(--bd);border-radius:14px;padding:12px;text-align:center}
+.st b{display:block;font-size:1.5rem;color:var(--c2)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
+.tab{display:none}.tab.on{display:block}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th,td{padding:8px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:top}
+th{position:sticky;top:0;background:#16133a}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row>*{flex:1;min-width:120px}.row>button{flex:0 0 auto}
+.li{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--bd);font-size:.88rem}
+.muted{opacity:.65;font-size:.8rem}
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+<div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+
+<div class="wrap">
+  <header>
+    <div class="logo">🧪 Z-LABS <span style="color:var(--c2)">Challenge</span></div>
+    <div class="status" id="status">⏳ Connecting...</div>
+  </header>
+
+  <h1>🎲 Random Challenge Generator</h1>
+  <p class="sub">Button dabao, dosto ke saath maze karo! 🔥 <span id="count"></span></p>
+
+  <div class="chips" id="chips"></div>
+
+  <div class="scene"><div class="cube" id="cube">
+    <div class="face f1">🎲</div><div class="face f2">🔥</div><div class="face f3">😂</div>
+    <div class="face f4">🧠</div><div class="face f5">🎨</div><div class="face f6">⭐</div>
+  </div></div>
+
+  <div class="card" id="card">
+    <div class="badge" id="badge">🎯 Ready</div>
+    <div class="txt" id="txt">Neeche ROLL button dabao! 👇</div>
+  </div>
+
+  <button class="roll-btn" id="roll">🎲 ROLL CHALLENGE</button>
+
+  <div class="acts">
+    <button class="sm" id="copy">📋 Copy</button>
+    <button class="sm" id="wa">📲 WhatsApp</button>
+    <button class="sm" id="done">✅ Done (<span id="dn">0</span>)</button>
+    <button class="sm" id="snd">🔊 Sound ON</button>
+  </div>
+
+  <div class="hist" id="hist"></div>
+
+  <footer>Made with ❤️ by Z-Labs • <button class="sm" id="adminBtn">🔐 Admin</button> <a class="sm" href="admin.html" style="text-decoration:none;display:inline-block">📊 Pro Dashboard</a></footer>
+</div>
+
+<!-- LOGIN -->
+<div class="modal" id="login">
+  <div class="box">
+    <h3>🔐 Admin Login</h3>
+    <input type="password" id="pw" placeholder="Password" autocomplete="off">
+    <div class="row" style="margin-top:8px">
+      <button class="sm" id="loginGo">Login 🚀</button>
+      <button class="sm red" id="loginX">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="modal" id="adm">
+  <div class="dash">
+    <div class="dh">
+      <h2>📊 Admin Dashboard</h2>
+      <div class="row" style="flex:0 0 auto">
+        <button class="sm" id="refresh">🔄 Refresh</button>
+        <button class="sm red" id="logout">Logout</button>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="st"><b id="s1">0</b>Total Results</div>
+      <div class="st"><b id="s2">0</b>Challenges in Sheet</div>
+      <div class="st"><b id="s3">-</b>Top Category</div>
+    </div>
+    <div class="tabs">
+      <button class="sm" data-t="t1">📜 Results</button>
+      <button class="sm" data-t="t2">🎯 Challenges</button>
+      <button class="sm" data-t="t3">🛠️ Tools</button>
+    </div>
+
+    <div class="tab" id="t1">
+      <div class="row"><input id="rs" placeholder="🔍 Search results..."><button class="sm" id="csv">⬇️ Download CSV</button></div>
+      <div id="rtable" style="margin-top:8px"></div>
+    </div>
+
+    <div class="tab" id="t2">
+      <div class="row">
+        <input id="nc" placeholder="Nayi challenge likho...">
+        <input id="ncat" placeholder="Category (e.g. 😂 Funny)" value="🎯 Custom">
+        <button class="sm" id="addc">➕ Add</button>
+      </div>
+      <textarea id="bulk" rows="4" placeholder="Bulk add: har line mein ek challenge. Category ke saath: 😂 Funny | Challenge text"></textarea>
+      <button class="sm" id="bulkgo">📥 Bulk Add</button>
+      <input id="cs" placeholder="🔍 Search challenges..." style="margin-top:10px">
+      <div id="clist"></div>
+    </div>
+
+    <div class="tab" id="t3">
+      <p class="muted" style="margin-bottom:10px">Built-in challenges: <b id="bn"></b></p>
+      <div class="row">
+        <button class="sm" id="upl">☁️ Upload Built-in Challenges to Google Sheets</button>
+        <button class="sm" id="dlsite">🌐 Download This Website (HTML)</button>
+      </div>
+      <p class="muted" id="prog" style="margin-top:10px"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+const API='https://script.google.com/macros/s/AKfycbyQNJwvAYTMP8UFO0Rhacm2J3EYAxoQauGTaFq3DoYpelN3WXYkfThBQinwfyDVdAFz/exec';
+const SNAP='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const ls={g:(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},s:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+/* ========= BUILT-IN CHALLENGE GENERATOR (1000+) ========= */
+const ex=p=>{let r=[''];for(const x of p){r=Array.isArray(x)?r.flatMap(a=>x.map(b=>a+b)):r.map(a=>a+x)}return r};
+const G={
+"😂 Funny":[
+ ["Speak only like ",["a robot","a news anchor","a dramatic drama actor","a spy whisperer","an old grandpa","a cartoon character","Shakespeare","a cricket commentator"]," for ",["2 minutes","the next 5 sentences","3 minutes","until your next turn"]],
+ ["Do a ",["cricket commentator","strict teacher","news reporter","filmy hero","cartoon villain","wedding aunty","robot","sleepy cat","bargaining shopkeeper","YouTuber"]," impression for ",["30 seconds","1 minute"]],
+ ["Make up a funny song about ",["your phone","chai","homework","your shoes","Wi-Fi","a mosquito","the fridge","biryani","your bag","traffic"]," in ",["rap style","qawwali style","opera style"]],
+ ["Act like a ",["monkey","penguin","lion","cat","chicken","elephant","snake","dinosaur","dog","panda","camel","frog"]," ",["without making a sound until someone guesses","and make everyone laugh","while 'eating' an imaginary biryani"]],
+ ["Tell your funniest ",["school","family","embarrassing","travel","food"]," story in ",["1 minute","30 seconds","exactly 5 sentences"]]],
+"🔥 Dare":[
+ ["Send a ",["voice note","funny selfie","meme","emoji-only message"]," to ",["your last chat","a random contact","your family group","your best friend"]," saying ",["'I just got a new superpower'","'guess who I am'","'I miss you, bro'","'AOA, kya chal raha hai?'"]],
+ ["Let the group pick your next ",["WhatsApp status","profile picture","nickname","ringtone"]," for ",["1 hour","1 day","until tomorrow"]],
+ ["Say '",["I love homework","Maggi is better than biryani","I can fly","I am the CEO of this room","Aliens are my cousins"],"' to ",["a stranger","your mirror","the nearest person","your pet or a plant"]," with a straight face"],
+ ["Let someone ",["draw on","write a word on","stick a funny sticker on"]," your ",["hand (washable marker only)","phone case","notebook"]," for ",["10 minutes","the rest of the game"]],
+ ["Talk in ",["rhymes","questions only","a funny accent","only one-word answers"]," with everyone for ",["3 minutes","5 minutes","the next round"]]],
+"💪 Physical":[
+ ["Do ",["10","15","20","25","30"]," ",["jumping jacks","squats","push-ups","sit-ups","burpees","high knees"]," ",["in one go","while smiling nonstop","while humming your favorite tune"]],
+ ["Hold a ",["plank","wall sit","one-leg stand","tiptoe stand"]," for ",["30 seconds","45 seconds","1 minute"]," ",["without talking","while someone tells you a joke","and recite the alphabet backwards"]],
+ ["Walk ",["backwards","like a crab","like a penguin","like a model on a ramp","in slow motion"]," from ",["one end of the room to the other","your door to the gate"]," ",["3 times","2 times"]],
+ ["Dance ",["freestyle","like a robot","like nobody is watching","in slow motion","like a chicken"]," for ",["30 seconds","1 minute","2 minutes"]]],
+"🧠 Brain":[
+ ["Name ",["5","7","10"]," ",["fruits","countries","cricketers","cartoon characters","cities of Pakistan","animals","movies","YouTubers","mobile apps","things in a kitchen"]," in ",["10 seconds","15 seconds","20 seconds"]],
+ ["Say '",["red lorry, yellow lorry","she sells seashells by the seashore","unique New York","toy boat"],"' ",["3","5","7"]," times fast ",["without mistakes","while holding your nose","while standing on one leg"]],
+ ["Spell ",["your full name","'Pakistan'","'Chocolate'","'Technology'","'Entertainment'","your school name"]," backwards in ",["10 seconds","15 seconds"]],
+ ["Count backwards from ",["100","50","200"]," by ",["2s","3s","7s"]," ",["for 20 seconds","without pausing for 15 seconds"]],
+ ["Name a word for each letter from ",["A to F","G to M","N to S","T to Z"]," on the topic of ",["food","animals","names","places"]," in 1 minute"]],
+"🎨 Creative":[
+ ["Draw a ",["superhero","monster","robot","cartoon cat","pizza","spaceship","dragon","funny teacher","chai cup with a face","phone with legs","flying car","alien"]," in ",["30 seconds","45 seconds","1 minute"]," ",["with your non-writing hand","with your eyes closed","using only circles"]],
+ ["Invent a new ",["snack","superhero","app","festival","sport","gadget","YouTube channel","cartoon character"]," called ",["'Zawi'","'Mega'","'Turbo'","'Nano'","'Z-Labs'"]," and pitch it in ",["30 seconds","1 minute"]],
+ ["Write a ",["4-line poem","tweet","product ad slogan","movie title","superhero name"]," about ",["chai","exams","WhatsApp","load shedding","Wi-Fi","biryani","cricket","phone battery"]]],
+"🤝 Social":[
+ ["Give a ",["genuine compliment","funny (kind) nickname","thank-you message"]," to ",["the person on your left","the youngest person here","the quietest person here","the person who laughs the most","everyone in the room"]," ",["right now","in a rhyme"]],
+ ["Ask ",["2","3","5"]," people: ",["what's your dream job?","what's your best memory?","what's your favorite food?","which superpower would you pick?","what's your hidden talent?","what's your favorite cartoon?"]," and share the answers"],
+ ["Call or message ",["an old friend","a cousin","a teacher you respect","your grandparents","a family member"]," and ",["say thanks","tell a joke","ask how they are","share a fun memory"]],
+ ["Play ",["Antakshari (humming only)","20 Questions","Charades","Word chain","Would You Rather"]," with ",["2","3","4"]," people for ",["5 minutes","10 minutes"]]],
+"🍕 Food":[
+ ["Make a ",["sandwich","chai","maggi","omelette","fruit chaat","juice","shake"]," ",["in under 5 minutes","using only 3 ingredients","and name it after a friend","and present it like a chef"]," (ask an elder for help near the stove)"],
+ ["Try a mix of ",["chocolate + banana","chai + biscuit","mango + milk","apple + peanut butter","cucumber + chaat masala"]," and rate it ",["out of 10","like a food critic"]],
+ ["Describe your ",["favorite","least favorite","dream"]," ",["dish","street food","drink","dessert"]," like a ",["food vlogger","poet","cricket commentator"]]],
+"🌍 Mini Quest":[
+ ["Take a photo of ",["something red","something round","something older than you","something shaped like a heart","a funny shadow","a cute animal","a cool pattern","the sky"]," within ",["2 minutes","5 minutes","10 minutes"]],
+ ["Find ",["3","5"]," ",["blue","green","yellow","square","tiny"]," things around you in ",["1 minute","2 minutes"]],
+ ["Record a ",["15-second","30-second"]," ",["mini vlog","news report","product ad","horror trailer","comedy sketch"]," about ",["your room","your phone","your shoes","your bag","a spoon"]]],
+"💻 Creator":[
+ ["Design a ",["logo","poster","thumbnail","business card","Instagram post"]," for ",["a chai stall","a robot cafe","a gaming channel","a school club","a mobile shop","a pizza brand"]," in ",["5 minutes","10 minutes"]],
+ ["Write an AI prompt to generate ",["a cartoon character","a futuristic city","a product photo","a cinematic scene","a poster"]," about ",["a cat astronaut","a flying rickshaw","a robot cricketer","a dragon chef"]]]
+};
+const BUILTIN=(()=>{const seen=new Set(),out=[];for(const cat in G)for(const t of G[cat])for(let s of ex(t)){s=s.replace(/\s+/g,' ').trim();if(!/[.!?')]$/.test(s))s+='.';if(!seen.has(s)){seen.add(s);out.push({challenge:s,category:cat})}}return out})();
+
+/* ========= API ========= */
+async function api(body){
+  const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)});
+  return r.json();
+}
+async function getSheet(){
+  const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),12000);
+  try{const r=await fetch(API+'?action=challenges&t='+Date.now(),{signal:ctl.signal});const j=await r.json();if(!j.ok)throw 0;return j.data}
+  finally{clearTimeout(t)}
+}
+
+/* ========= STATE ========= */
+let pool=[],cat='All',busy=false,mute=false,last=null,rolls=0;
+let hist=ls.g('zl_hist',[]),done=ls.g('zl_done',0);
+$('#dn').textContent=done;
+
+async function loadPool(){
+  try{
+    const d=await getSheet();
+    if(d.length){pool=d;ls.s('zl_pool',d);$('#status').textContent='☁️ Sheets Connected ✅'}
+    else{pool=BUILTIN;$('#status').textContent='☁️ Connected • Sheet empty (built-in mode)'}
+  }catch(e){
+    pool=ls.g('zl_pool',null)||BUILTIN;$('#status').textContent='⚠️ Offline mode (built-in)';
+  }
+  $('#count').textContent='• '+pool.length+' challenges 🎯';
+  renderChips();
+}
+function renderChips(){
+  const cats=['All',...new Set(pool.map(c=>c.category))];
+  if(!cats.includes(cat))cat='All';
+  $('#chips').innerHTML=cats.map(c=>`<button class="chip ${c===cat?'on':''}" data-c="${esc(c)}">${c==='All'?'🌈 All':esc(c)}</button>`).join('');
+  document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{cat=b.dataset.c;tone(600,.05);renderChips()});
+}
+function renderHist(){
+  $('#hist').innerHTML=hist.length?'<b>🕘 Recent:</b>'+hist.slice(0,5).map(h=>`<div>${esc(h)}</div>`).join(''):'';
+}
+renderHist();
+
+/* ========= SOUND ========= */
+let AC;
+function tone(f,d=.08,type='square',v=.035){
+  if(mute)return;
+  try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+d);o.stop(AC.currentTime+d)}catch(e){}
+}
+$('#snd').onclick=()=>{mute=!mute;$('#snd').textContent=mute?'🔇 Sound OFF':'🔊 Sound ON'};
+
+/* ========= ROLL ========= */
+const card=$('#card'),txt=$('#txt'),badge=$('#badge'),cube=$('#cube'),btn=$('#roll');
+function roll(){
+  if(busy)return;
+  const list=cat==='All'?pool:pool.filter(c=>c.category===cat);
+  if(!list.length){toast('Is category mein challenge nahi 😅');return}
+  busy=true;btn.disabled=true;btn.textContent='🌀 Shuffling...';
+  card.classList.remove('reveal');card.classList.add('shuffling');cube.classList.add('roll');
+  const pick=list[Math.random()*list.length|0];
+  let d=50,t=0;
+  const step=()=>{
+    const r=list[Math.random()*list.length|0];
+    txt.textContent=r.challenge;badge.textContent=r.category;
+    tone(300+Math.random()*500,.05);
+    t+=d;d*=1.12;
+    if(t<2100)setTimeout(step,d);else finish();
+  };
+  step();
+  function finish(){
+    txt.textContent=pick.challenge;badge.textContent=pick.category;last=pick;
+    card.classList.remove('shuffling');void card.offsetWidth;card.classList.add('reveal');
+    cube.classList.remove('roll');
+    confetti();burst();
+    [523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.25,'triangle',.08),i*110));
+    hist.unshift(pick.challenge);hist=hist.slice(0,10);ls.s('zl_hist',hist);renderHist();
+    api({action:'log',challenge:pick.challenge,category:pick.category}).catch(()=>{});
+    busy=false;btn.disabled=false;btn.textContent='🎲 ROLL AGAIN';
+  }
+}
+btn.onclick=roll;
+document.addEventListener('keydown',e=>{if(e.code==='Space'&&!['INPUT','TEXTAREA'].includes(e.target.tagName)&&!$('#adm').classList.contains('on')&&!$('#login').classList.contains('on')){e.preventDefault();roll()}});
+
+$('#copy').onclick=async()=>{if(!last)return toast('Pehle roll karo 🎲');try{await navigator.clipboard.writeText(last.challenge);toast('Copied ✅')}catch(e){toast('Copy nahi hua 😅')}};
+$('#wa').onclick=()=>{if(!last)return toast('Pehle roll karo 🎲');window.open('https://wa.me/?text='+encodeURIComponent('🎲 Challenge: '+last.challenge+'\n\nTum bhi try karo! — Z-Labs'),'_blank')};
+$('#done').onclick=()=>{if(!last)return toast('Pehle roll karo 🎲');done++;ls.s('zl_done',done);$('#dn').textContent=done;confetti();toast('Shabash! 🏆')};
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2200)}
+
+/* ========= FX CANVAS ========= */
+const cv=$('#fx'),cx=cv.getContext('2d');let W,H;
+function rs(){W=cv.width=innerWidth;H=cv.height=innerHeight}rs();addEventListener('resize',rs);
+const stars=Array.from({length:70},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*2+.5,v:Math.random()*.5+.15}));
+let parts=[];
+const COL=['#8b5cf6','#22d3ee','#f472b6','#facc15','#34d399','#fb923c'];
+function confetti(){
+  const b=card.getBoundingClientRect(),x=b.left+b.width/2,y=b.top+b.height/2;
+  for(let i=0;i<160;i++){const a=Math.random()*Math.PI*2,s=Math.random()*9+3;parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-4,w:Math.random()*8+4,h:Math.random()*5+3,c:COL[Math.random()*COL.length|0],rot:Math.random()*6,vr:(Math.random()-.5)*.4,life:100+Math.random()*60})}
+}
+function burst(){
+  const E=['🎉','🔥','⭐','😂','🎲','✨','💥','🏆'];
+  for(let i=0;i<14;i++){const s=document.createElement('span');s.className='em';s.textContent=E[Math.random()*E.length|0];s.style.left=(Math.random()*95)+'vw';s.style.animationDelay=(Math.random()*.6)+'s';document.body.appendChild(s);setTimeout(()=>s.remove(),3200)}
+}
+(function loop(){
+  cx.clearRect(0,0,W,H);
+  cx.fillStyle='rgba(180,200,255,.6)';
+  for(const s of stars){s.y-=s.v;if(s.y<0){s.y=H;s.x=Math.random()*W}cx.beginPath();cx.arc(s.x,s.y,s.r,0,7);cx.fill()}
+  parts=parts.filter(p=>p.life>0);
+  for(const p of parts){p.x+=p.vx;p.y+=p.vy;p.vy+=.22;p.vx*=.99;p.rot+=p.vr;p.life--;cx.save();cx.translate(p.x,p.y);cx.rotate(p.rot);cx.globalAlpha=Math.min(1,p.life/40);cx.fillStyle=p.c;cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);cx.restore()}
+  requestAnimationFrame(loop);
+})();
+
+/* ========= ADMIN ========= */
+let PW='',resRows=[],chRows=[],shown=100;
+$('#adminBtn').onclick=()=>{$('#login').classList.add('on');$('#pw').value='';setTimeout(()=>$('#pw').focus(),50)};
+$('#loginX').onclick=()=>$('#login').classList.remove('on');
+$('#pw').addEventListener('keydown',e=>{if(e.key==='Enter')$('#loginGo').click()});
+$('#loginGo').onclick=async()=>{
+  const p=$('#pw').value;if(!p)return toast('Password likho 🔑');
+  $('#loginGo').textContent='Checking...';
+  try{
+    const j=await api({action:'login',password:p});
+    if(j.ok){PW=p;$('#login').classList.remove('on');$('#adm').classList.add('on');showTab('t1');loadAdmin()}
+    else toast('❌ '+(j.error||'Wrong password'));
+  }catch(e){toast('Network error ⚠️ URL/Deployment check karo')}
+  $('#loginGo').textContent='Login 🚀';
+};
+$('#logout').onclick=()=>{PW='';$('#adm').classList.remove('on')};
+$('#refresh').onclick=loadAdmin;
+document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>showTab(b.dataset.t));
+function showTab(id){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id===id))}
+$('#bn').textContent=BUILTIN.length;
+
+async function loadAdmin(){
+  try{
+    const [r,c]=await Promise.all([api({action:'results',password:PW}),getSheet()]);
+    if(!r.ok)throw new Error(r.error);
+    resRows=r.data;chRows=c;
+  }catch(e){return toast('Load error: '+e.message)}
+  $('#s1').textContent=resRows.length;$('#s2').textContent=chRows.length;
+  const m={};resRows.forEach(x=>m[x.category]=(m[x.category]||0)+1);
+  const top=Object.entries(m).sort((a,b)=>b[1]-a[1])[0];$('#s3').textContent=top?top[0]:'-';
+  renderRes();renderCh();
+}
+function renderRes(){
+  const q=$('#rs').value.toLowerCase();
+  const rows=resRows.slice().reverse().filter(x=>(x.challenge+x.category).toLowerCase().includes(q));
+  $('#rtable').innerHTML=`<p class="muted">${rows.length} results (showing latest 300)</p><table><tr><th>#</th><th>Time</th><th>Challenge</th><th>Category</th></tr>`+
+    rows.slice(0,300).map((x,i)=>`<tr><td>${i+1}</td><td>${esc(new Date(x.time).toLocaleString())}</td><td>${esc(x.challenge)}</td><td>${esc(x.category)}</td></tr>`).join('')+'</table>';
+}
+$('#rs').oninput=renderRes;
+function renderCh(){
+  const q=$('#cs').value.toLowerCase();
+  const rows=chRows.filter(x=>(x.challenge+x.category).toLowerCase().includes(q));
+  $('#clist').innerHTML=`<p class="muted">${rows.length} challenges</p>`+rows.slice(0,shown).map(x=>`<div class="li"><span>${esc(x.category)} — ${esc(x.challenge)}</span><button class="sm red" data-id="${esc(x.id)}">🗑️</button></div>`).join('')+(rows.length>shown?'<button class="sm" id="more" style="margin-top:8px">Show more ⬇️</button>':'');
+  document.querySelectorAll('#clist [data-id]').forEach(b=>b.onclick=async()=>{
+    if(!confirm('Delete karni hai?'))return;
+    try{const j=await api({action:'remove',password:PW,id:b.dataset.id});if(!j.ok)throw new Error(j.error);toast('Removed 🗑️');await loadAdmin();loadPool()}catch(e){toast('Error: '+e.message)}
+  });
+  const mo=$('#more');if(mo)mo.onclick=()=>{shown+=100;renderCh()};
+}
+$('#cs').oninput=()=>{shown=100;renderCh()};
+$('#addc').onclick=async()=>{
+  const c=$('#nc').value.trim();if(!c)return toast('Challenge likho ✍️');
+  try{const j=await api({action:'add',password:PW,challenge:c,category:$('#ncat').value.trim()||'🎯 Custom'});if(!j.ok)throw new Error(j.error);$('#nc').value='';toast('Added ✅');await loadAdmin();loadPool()}catch(e){toast('Error: '+e.message)}
+};
+async function sendBulk(items,label){
+  let n=0;
+  for(let i=0;i<items.length;i+=150){
+    const j=await api({action:'bulkAdd',password:PW,items:items.slice(i,i+150)});
+    if(!j.ok)throw new Error(j.error);n+=j.added||0;$('#prog').textContent=`${label}: ${n}/${items.length} ⏳`;
+  }
+  return n;
+}
+$('#bulkgo').onclick=async()=>{
+  const items=$('#bulk').value.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const p=l.split('|');return p.length>1?{category:p[0].trim(),challenge:p.slice(1).join('|').trim()}:{category:'🎯 Custom',challenge:l}}).filter(x=>x.challenge);
+  if(!items.length)return toast('Kuch likho pehle ✍️');
+  try{const n=await sendBulk(items,'Bulk');$('#bulk').value='';toast(n+' added ✅');await loadAdmin();loadPool()}catch(e){toast('Error: '+e.message)}
+};
+$('#upl').onclick=async()=>{
+  const have=new Set(chRows.map(c=>c.challenge));
+  const items=BUILTIN.filter(b=>!have.has(b.challenge));
+  if(!items.length)return toast('Sab pehle se Sheet mein hain ✅');
+  if(!confirm(items.length+' challenges Sheet mein upload hongi. Continue?'))return;
+  try{const n=await sendBulk(items,'Upload');$('#prog').textContent='✅ Done! '+n+' challenges uploaded.';await loadAdmin();loadPool()}catch(e){toast('Error: '+e.message)}
+};
+function dl(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+$('#csv').onclick=()=>{
+  const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  dl('challenge-results.csv','\uFEFFTime,Challenge,Category\n'+resRows.map(r=>[q(new Date(r.time).toLocaleString()),q(r.challenge),q(r.category)].join(',')).join('\n'),'text/csv;charset=utf-8');
+};
+$('#dlsite').onclick=()=>dl('Z-Labs-Random-Challenge.html',SNAP,'text/html');
+
+loadPool();
+</script>
+</body>
+</html>
